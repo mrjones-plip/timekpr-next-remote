@@ -9,7 +9,15 @@ A python web based interface for easily adding or removing time for users of Tim
 
 ## Current state
 
-vaporware planning stages 
+nascent work in progress 
+
+## Install
+
+* python 3
+* clone this repo
+* copy `config.dist.py` to `config.py` - salt to taste
+* add ssh account on target machines
+* run it!
 
 ## Notes
 
