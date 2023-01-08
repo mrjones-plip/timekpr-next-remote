@@ -16,3 +16,15 @@ vaporware planning stages
 * docker for easy running?
 * sqlite3 for storage 
 * python ssh library: https://www.fabfile.org/
+
+## Development
+
+Development was done using locally running [LXD containers](https://canonical.com/blog/lxd-virtual-machines-an-overview). After launching an Ubuntu 22.04 container, SSH is enable by default, but only allows key access, so be sure to add your public keys as needed.  From there `adduser` a new user, then run this to install timekpr:
+
+```
+sudo add-apt-repository ppa:mjasnik/ppa
+sudo apt-get update
+sudo apt-get install timekpr-next x11-apps
+```
+
+From here you can `ssh -X USER@IP` and then run `timekpra` to configure timekpr via a GUI.  
