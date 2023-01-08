@@ -27,4 +27,6 @@ sudo apt-get update
 sudo apt-get install timekpr-next x11-apps
 ```
 
-From here you can `ssh -X USER@IP` and then run `timekpra` to configure your test users in timekpr via a GUI.  
+You can then `ssh -X USER@IP` and then run `timekpra` to configure your test users in timekpr via a GUI.  
+
+During development, it's nice to watch the times for a specific user with `watch -n 1 timekpra --userinfo USERNAME`
