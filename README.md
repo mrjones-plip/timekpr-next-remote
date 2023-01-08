@@ -17,6 +17,14 @@ vaporware planning stages
 * sqlite3 for storage 
 * python ssh library: https://www.fabfile.org/
 
+## Related projects
+
+* https://github.com/nvsmirnov/timekprw - defunct as it dependeded on  https://timekprw.ew.r.appspot.com which is dead
+* https://timekprw.ew.r.appspot.com - 7 yr old ruby app which uses older timekpr instead of timekpr-next
+* https://github.com/frohmut/timekpr-server - "Sample config server implementations and HTML UI for Timekpr"
+* https://github.com/frohmut/timekpr - "Timekpr-Sync: Timekpr extension to spread user configurations in the home network"
+* https://github.com/cisba/timekpr-cli - "Simple Timekpr CLI" - local python wrapper script
+
 ## Development
 
 Development can be done using locally running [LXD containers](https://canonical.com/blog/lxd-virtual-machines-an-overview). After launching an Ubuntu 22.04 container, SSH is enable by default, but only allows key access, so be sure to add your public keys as needed.  From there `adduser` a new user, then run this to install timekpr:
