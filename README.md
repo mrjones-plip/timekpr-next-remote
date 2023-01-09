@@ -1,6 +1,6 @@
 # Timekpr-nExT Remote
 
-A python web based interface for easily adding or removing time for users of Timekpr-nExT. The priimary goal is to allow a non-technical parent to use a local (not on the itnernet) web app to:
+A python web based interface for easily adding or removing time for users of [Timekpr-nExT](https://mjasnik.gitlab.io/timekpr-next/). The primary goal is to allow a non-technical parent to use a local (not on the internet) web app to:
 
 * require a simple PIN to access the web app
 * see current time usage for all users
@@ -22,7 +22,7 @@ nascent work in progress
 ## Notes
 
 * docker for easy running?
-* sqlite3 for storage 
+* sqlite3 for storage ?
 * python ssh library: https://www.fabfile.org/
 
 ## Related projects
