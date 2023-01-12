@@ -6,18 +6,27 @@ from fabric import Connection
 from paramiko.ssh_exception import AuthenticationException
 
 
+def get_config():
+    return conf.trackme
+
+
 def get_usage(user, computer, ssh):
-    timekpra_userinfo_output = ssh.run(
+    # to do - maybe check if user is in timekpr first? (/usr/bin/timekpra --userlist)
+    timekpra_userinfo_output = str(ssh.run(
             conf.ssh_timekpra_bin + ' --userinfo ' + user,
             hide=True
-        )
-    search = r"(ACTUAL_TIME_LEFT_DAY: )([0-9]+)"
-    actual_time_left = re.search(search, str(timekpra_userinfo_output))
+        ))
+    search = r"(TIME_LEFT_DAY: )([0-9]+)"
+    time_left = re.search(search, timekpra_userinfo_output)
     # todo - better handle "else" when we can't find time remaining
-    if actual_time_left and actual_time_left.group(2):
-        print(f"time left for {user} at {computer}: " + str(actual_time_left.group(2)) + str(timekpra_userinfo_output))
+    if not time_left or not time_left.group(2):
+        print(f"Error getting time left, setting to 0")
+        time_left = '0'
     else:
-        print(f"error! Could not get get usage for {user} at {computer}. SSH returned {str(actual_time_left)}")
+        time_left = str(time_left.group(2))
+
+    print(f"Time left for {user} at {computer}: {time_left}")
+    return time_left
 
 
 def get_connection(computer):
@@ -45,30 +54,19 @@ def get_connection(computer):
 def adjust_time(up_down_string, seconds, ssh, user):
     command = conf.ssh_timekpra_bin + ' --settimeleft ' + user + ' ' + up_down_string + ' ' + str(seconds)
     ssh.run(command)
+    if up_down_string == '-':
+        print(f"added {str(seconds)} for user {user}")
+    else:
+        print(f"removed {str(seconds)} for user {user}")
+    # todo - return false if this fails
+    return True
 
 
 def increase_time(seconds, ssh, user):
-    adjust_time('+', seconds, ssh, user)
-    print(f"added {str(seconds)} for user {user}")
+    return adjust_time('+', seconds, ssh, user)
 
 
 def decrease_time(seconds, ssh, user):
-    adjust_time('-', seconds, ssh, user)
-    print(f"removed {str(seconds)} for user {user}")
-
-def main():
-    print('timetrkr-next-remote started')
-
-    # todo - this should allow for more than one user per IP
-    for ip in conf.trackme.keys():
-        user = conf.trackme[ip]
-        ssh = get_connection(ip)
-        get_usage(user[0], ip, ssh)
-        increase_time(100, ssh, user[0])
-        get_usage(user[0], ip, ssh)
-        decrease_time(100, ssh, user[0])
-        get_usage(user[0], ip, ssh)
+    return adjust_time('-', seconds, ssh, user)
 
 
-if __name__ == '__main__':
-    main()
