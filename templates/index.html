@@ -3,9 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <title>Timekpr Next Remote</title>
+    <script src="{{ url_for('static', filename='jquery-3.6.3.min.js') }}"></script>
+
+        <style>
+            body {
+                font-size: 2.5vw;
+            }
+
+            /* ==========================================================================
+               Fork Me on Github Stuffs
+               ========================================================================== */
+            #forkongithub a {
+                background:#000;
+                color:#ddd;
+                text-decoration:none;
+                font-family:arial,sans-serif;
+                text-align:center;
+                font-weight:bold;
+                padding:5px 40px;
+                transition:0.5s;
+                font-size:.8rem;
+                line-height: 1rem;
+                width:200px;
+                position:absolute;
+                top:60px;
+                right:-40px;
+                transform:rotate(45deg);
+                -webkit-transform:rotate(45deg);
+                -ms-transform:rotate(45deg);
+                -moz-transform:rotate(45deg);
+                -o-transform:rotate(45deg);
+                box-shadow:4px 4px 10px rgba(0,0,0,0.8);
+            }
+            #forkongithub a:hover{background:#c11;
+                color:#fff;
+            }
+            #forkongithub a::before,#forkongithub a::after{
+                content:"";
+                width:100%;
+                display:block;
+                position:absolute;
+                top:1px;
+                left:0;
+                height:1px;
+                background:#fff;
+            }
+            #forkongithub a::after{
+                bottom:1px;
+                top:auto;
+            }
+            .glow {
+                outline: none;
+                border-color: yellow;
+                box-shadow: 0 0 20px yellow;
+            }
+            #forkongithub {
+                position:fixed;
+                display:block;
+                width:200px;
+                overflow:hidden;
+                height:200px;
+                z-index:9999;
+                right: -55px;
+                top: -30px;
+            }
+            button {
+                vertical-align: middle;
+                margin-bottom: .5%;
+                padding: .3%;
+                font-size: 1.4vw;
+                background-color: white;
+             }
+
+        </style>
 </head>
 <body>
-<h1>Timekpr Next Remote</h1>
+    <!-- thanks https://codepo8.github.io/css-fork-on-github-ribbon/ ! -->
+    <span id="forkongithub" class="hidden-print ">
+        <a href="https://github.com/mrjones-plip/timekpr-next-remote">Fork me on GitHub</a>
+    </span>
 
+    <h1>Timekpr Next Remote</h1>
+    <div id="people"></div>
+
+<script>
+$.getJSON( "/config", function( data ) {
+    const items = [];
+    $.each( data, function( key, val ) {
+        items.push( "<div id='" + key + "'>" + val + key + "</div>" );
+    });
+
+    $("#people").html(items.join( "" ));
+});
+</script>
 </body>
 </html>
