@@ -27,16 +27,20 @@ def get_usage(computer, user):
 def increase_time(computer, user, seconds):
     # todo - validate computer and user exist in config
     ssh = main.get_connection(computer)
-    main.increase_time(seconds, ssh, user)
-    return "done"
+    if main.increase_time(seconds, ssh, user):
+        return "done"
+    else:
+        return "fail", 404
 
 
 @app.route("/decrease_time/<computer>/<user>/<seconds>")
 def decrease_time(computer, user, seconds):
     # todo - validate computer and user exist in config
     ssh = main.get_connection(computer)
-    main.decrease_time(seconds, ssh, user)
-    return "done"
+    if main.decrease_time(seconds, ssh, user):
+        return "done"
+    else:
+        return "fail", 404
 
 
 
