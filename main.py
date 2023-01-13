@@ -20,7 +20,7 @@ def get_usage(user, computer, ssh):
     time_left = re.search(search, timekpra_userinfo_output)
     # todo - better handle "else" when we can't find time remaining
     if not time_left or not time_left.group(2):
-        print(f"Error getting time left, setting to 0")
+        print(f"Error getting time left, setting to 0. ssh call result: " + str(timekpra_userinfo_output))
         time_left = '0'
     else:
         time_left = str(time_left.group(2))

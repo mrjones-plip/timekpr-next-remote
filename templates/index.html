@@ -88,9 +88,19 @@
 
 <script>
 $.getJSON( "/config", function( data ) {
+    let lastkey = ''
     const items = [];
     $.each( data, function( key, val ) {
-        items.push( "<div id='" + key + "'>" + val + key + "</div>" );
+        if (lastkey !== key){
+            items.push("<h2>Users at " + key + ":</h2>");
+            lastkey = key;
+        }
+        items.push( val +
+            " <button id='" + key + "'>Add 15 min</button>" +
+            " <button id='" + key + "'>Add 30 min</button>" +
+            " <button id='" + key + "'>Remove 15 min</button>" +
+            " <button id='" + key + "'>Remove 30 min</button>"
+        );
     });
 
     $("#people").html(items.join( "" ));
