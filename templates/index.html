@@ -9,6 +9,19 @@
             body {
                 font-size: 2.5vw;
             }
+            button {
+                font-size: 2vw;
+            }
+
+            @media screen and (max-width: 420px) {
+                body {
+                    font-size: 5vw;
+
+                }
+                button {
+                    font-size: 3vw;
+                }
+            }
 
             /* ==========================================================================
                Fork Me on Github Stuffs
@@ -67,13 +80,6 @@
                 right: -55px;
                 top: -30px;
             }
-            button {
-                vertical-align: middle;
-                margin-bottom: .5%;
-                padding: .3%;
-                font-size: 1.4vw;
-                background-color: white;
-             }
 
         </style>
 </head>
@@ -88,23 +94,78 @@
 
 <script>
 $.getJSON( "/config", function( data ) {
-    let lastkey = ''
+    let last_computer = ''
     const items = [];
-    $.each( data, function( key, val ) {
-        if (lastkey !== key){
-            items.push("<h2>Users at " + key + ":</h2>");
-            lastkey = key;
+    $.each( data, function( computer, user ) {
+        if (last_computer !== computer){
+            items.push("<h2>" + computer + ":</h2>");
+            last_computer = computer;
         }
-        items.push( val +
-            " <button id='" + key + "'>Add 15 min</button>" +
-            " <button id='" + key + "'>Add 30 min</button>" +
-            " <button id='" + key + "'>Remove 15 min</button>" +
-            " <button id='" + key + "'>Remove 30 min</button>"
+        const seconds_left = get_usage(user, computer);
+        items.push(
+            "<span class='user' id='"+ user + "'>" +
+                "<b>" + user + "</b> " +
+                "<span id='usage'>" + secondsToHms(seconds_left) + " remain</span><br/>" +
+                "<input type='radio'  id='add' value='add' name='action'><label for='add'>Add</label>" +
+                "<input type='radio'  id='remove' value='remove' name='action'><label for='remove'>Remove</label> " +
+                "<button value='300' user='"+ user + "' computer='" + computer + "'>5 min</button> " +
+                "<button value='900' user='"+ user + "' computer='" + computer + "'>15 min</button> " +
+                "<button value='1800' user='"+ user + "' computer='" + computer + "'>30 min</button> " +
+                "<button value='2700' user='"+ user + "' computer='" + computer + "'>45 min</button> " +
+                "<button value='3600'  user='"+ user + "' computer='" + computer + "'>1 hr</button> " +
+            "</span>"
         );
+        get_usage();
     });
 
     $("#people").html(items.join( "" ));
+
+    $("button" ).click(function() {
+        const user = $( this ).attr('user');
+        const computer = $( this ).attr('computer');
+        const action = $( '#' + user + ' input[name="action"]:checked').val();
+        const seconds = $( this ).val();
+        if(action !== undefined){
+            add_or_remove_time(user, computer, action, seconds);
+        } else {
+            alert("Choose 'Add' or 'Remove'");
+        }
+    });
 });
+
+function add_or_remove_time(user, computer, action, seconds){
+    let form;
+    if(action === 'add'){
+        form = 'increase_time'
+    } else {
+        form = 'decrease_time'
+    }
+    $.getJSON("/" + form + "/" + computer + "/" + user + "/" + seconds, function( data ) {
+        $('#' + user + " #usage").html(secondsToHms(data.usage));
+    });
+}
+
+function get_usage(user, computer){
+    return $.ajax({
+        type: "GET",
+        url: "/get_usage/" + computer + "/" + user,
+        async: false
+    }).responseText;
+}
+
+// thanks https://stackoverflow.com/a/37096512 !
+function secondsToHms(d) {
+    d = Number(d);
+    var h = Math.floor(d / 3600);
+    var m = Math.floor(d % 3600 / 60);
+    var s = Math.floor(d % 3600 % 60);
+
+    var hDisplay = h > 0 ? h + (h === 1 ? " hr, " : " hrs, ") : "";
+    var mDisplay = m > 0 ? m + (m === 1 ? " min, " : " mins, ") : "";
+    var sDisplay = s > 0 ? s + (s === 1 ? " sec" : " secs") : "";
+    return hDisplay + mDisplay + sDisplay;
+}
+
 </script>
 </body>
 </html>
