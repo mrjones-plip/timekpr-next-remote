@@ -150,6 +150,9 @@ function get_usage(user, computer){
 
 // thanks https://stackoverflow.com/a/37096512 !
 function secondsToHms(d) {
+    if (Number(d) === 0){
+        return "none";
+    }
     d = Number(d);
     var h = Math.floor(d / 3600);
     var m = Math.floor(d % 3600 / 60);
