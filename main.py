@@ -18,15 +18,19 @@ def get_usage(user, computer, ssh):
         ))
     search = r"(TIME_LEFT_DAY: )([0-9]+)"
     time_left = re.search(search, timekpra_userinfo_output)
+    search = r"(TIME_SPENT_DAY: )([0-9]+)"
+    time_spent = re.search(search, timekpra_userinfo_output)
     # todo - better handle "else" when we can't find time remaining
     if not time_left or not time_left.group(2):
         print(f"Error getting time left, setting to 0. ssh call result: " + str(timekpra_userinfo_output))
         time_left = '0'
+        time_spent = '0'
     else:
         time_left = str(time_left.group(2))
+        time_spent = str(time_spent.group(2))
 
-    print(f"Time left for {user} at {computer}: {time_left}")
-    return time_left
+    print(f"Time left for {user} at {computer}: {time_spent}")
+    return {'time_left': time_left, 'time_spent': time_spent}
 
 
 def get_connection(computer):

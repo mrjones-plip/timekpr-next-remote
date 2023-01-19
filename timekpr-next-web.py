@@ -1,8 +1,8 @@
 import main
-import conf, re
+import conf, re, os
 from fabric import Connection
 from paramiko.ssh_exception import AuthenticationException
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_from_directory
 
 app = Flask(__name__)
 
@@ -31,7 +31,8 @@ def get_usage(computer, user):
     if validate_request(computer, user)['result'] == "fail":
         return validate_request(computer, user), 500
     ssh = main.get_connection(computer)
-    return main.get_usage(user, computer, ssh)
+    usage = main.get_usage(user, computer, ssh)
+    return {'result': "success", "time_left": usage['time_left'], "time_spent": usage['time_spent']}, 200
 
 
 @app.route("/increase_time/<computer>/<user>/<seconds>")
@@ -40,7 +41,8 @@ def increase_time(computer, user, seconds):
         return validate_request(computer, user), 500
     ssh = main.get_connection(computer)
     if main.increase_time(seconds, ssh, user):
-        return {'result': "success", "usage": main.get_usage(user, computer, ssh)}, 200
+        usage = main.get_usage(user, computer, ssh)
+        return {'result': "success", "time_left": usage['time_left'], "time_spent": usage['time_spent']}, 200
     else:
         return {'result': "fail"}, 500
 
@@ -51,10 +53,16 @@ def decrease_time(computer, user, seconds):
         return validate_request(computer, user), 500
     ssh = main.get_connection(computer)
     if main.decrease_time(seconds, ssh, user):
-        return {'result': "success", "usage": main.get_usage(user, computer, ssh)}, 200
+        usage = main.get_usage(user, computer, ssh)
+        return {'result': "success", "time_left": usage['time_left'], "time_spent": usage['time_spent']}, 200
     else:
         return {'result': "fail"}, 500
 
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+        'favicon.ico',mimetype='image/vnd.microsoft.icon')
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
