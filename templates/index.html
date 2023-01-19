@@ -1,27 +1,14 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Timekpr Next Remote</title>
-    <script src="{{ url_for('static', filename='jquery-3.6.3.min.js') }}"></script>
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
+    <!-- Bootstrap CSS -->
+    <link href="{{ url_for('static', filename='bootstrap.5.1.3.min.css') }}" rel="stylesheet" >
         <style>
-            body {
-                font-size: 2.5vw;
-            }
-            button {
-                font-size: 2vw;
-            }
 
-            @media screen and (max-width: 420px) {
-                body {
-                    font-size: 5vw;
-
-                }
-                button {
-                    font-size: 3vw;
-                }
-            }
 
             /* ==========================================================================
                Fork Me on Github Stuffs
@@ -39,8 +26,8 @@
                 line-height: 1rem;
                 width:200px;
                 position:absolute;
-                top:60px;
-                right:-40px;
+right: 17px;
+top: 77px;
                 transform:rotate(45deg);
                 -webkit-transform:rotate(45deg);
                 -ms-transform:rotate(45deg);
@@ -77,93 +64,114 @@
             }
 
         </style>
-</head>
-<body>
+    <title>Timekpr Next Remote</title>
+  </head>
+  <body>
     <!-- thanks https://codepo8.github.io/css-fork-on-github-ribbon/ ! -->
     <span id="forkongithub" class="hidden-print ">
         <a href="https://github.com/mrjones-plip/timekpr-next-remote">Fork me on GitHub</a>
     </span>
+<div class="container-sm">
 
-    <h1>Timekpr Next Remote</h1>
+  <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
+    <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
+    <span class="fs-1">Timekpr Next Remote</span>
+    </a>
+  </header>
+
+  <div class="b-example-divider"></div>
     <div id="people"></div>
+</div>
+    <script src="{{ url_for('static', filename='bootstrap.5.1.3.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='jquery-3.6.3.min.js') }}"></script>
+    <script>
+    $.getJSON( "/config", function( data ) {
+        let last_computer = ''
+        const items = [];
+        $.each( data, function( computer, user ) {
+            seconds_used = 3932;
+            if (last_computer !== computer){
+                items.push("<h2  class='display-4'>" + computer + "</h2>");
+                last_computer = computer;
+            }
+            const seconds_left = get_usage(user, computer);
+            items.push(
+                "<span class='user' id='"+ user + "'>" +
+                    "<span  class='h3'>" + user  + " " +
+                      "<span id='usage'>" + secondsToHms(seconds_left) + " remain</span><br/>" +
+                      "<span id='used'>" + secondsToHms(seconds_used) + " total used today</span><br/>" +
+                    "</span>" +
+                    "<div class='btn-group' role='group' aria-label='Action'>" +
+                      "<input type='radio'  class='btn-check' id='add' value='add' name='action'><label  class='btn btn-outline-primary' for='add'>Add</label>" +
+                      "<input type='radio'  class='btn-check' id='remove' value='remove' name='action'><label  class='btn btn-outline-primary' for='remove'>Remove</label> " +
+                    "</div> " +
+                    "<div class='btn-group' role='group' aria-label='Times'>" +
+                      "<button class='btn btn-primary' value='300' user='"+ user + "' computer='" + computer + "'>5 min</button> " +
+                      "<button class='btn btn-primary' value='900' user='"+ user + "' computer='" + computer + "'>15 min</button> " +
+                      "<button class='btn btn-primary' value='1800' user='"+ user + "' computer='" + computer + "'>30 min</button> " +
+                      "<button class='btn btn-primary' value='2700' user='"+ user + "' computer='" + computer + "'>45 min</button> " +
+                      "<button class='btn btn-primary' value='3600'  user='"+ user + "' computer='" + computer + "'>1 hr</button> " +
+                    "</div>" +
+                "</span>"
+            );
+            get_usage();
+        });
 
-<script>
-$.getJSON( "/config", function( data ) {
-    let last_computer = ''
-    const items = [];
-    $.each( data, function( computer, user ) {
-        if (last_computer !== computer){
-            items.push("<h2>" + computer + ":</h2>");
-            last_computer = computer;
-        }
-        const seconds_left = get_usage(user, computer);
-        items.push(
-            "<span class='user' id='"+ user + "'>" +
-                "<b>" + user + "</b> " +
-                "<span id='usage'>" + secondsToHms(seconds_left) + " remain</span><br/>" +
-                "<input type='radio'  id='add' value='add' name='action'><label for='add'>Add</label>" +
-                "<input type='radio'  id='remove' value='remove' name='action'><label for='remove'>Remove</label> " +
-                "<button value='300' user='"+ user + "' computer='" + computer + "'>5 min</button> " +
-                "<button value='900' user='"+ user + "' computer='" + computer + "'>15 min</button> " +
-                "<button value='1800' user='"+ user + "' computer='" + computer + "'>30 min</button> " +
-                "<button value='2700' user='"+ user + "' computer='" + computer + "'>45 min</button> " +
-                "<button value='3600'  user='"+ user + "' computer='" + computer + "'>1 hr</button> " +
-            "</span>"
-        );
-        get_usage();
+        $("#people").html(items.join( "" ));
+
+        $("button" ).click(function() {
+            const user = $( this ).attr('user');
+            const computer = $( this ).attr('computer');
+            const action = $( '#' + user + ' input[name="action"]:checked').val();
+            const seconds = $( this ).val();
+            if(action !== undefined){
+                add_or_remove_time(user, computer, action, seconds);
+            } else {
+                alert("Choose 'Add' or 'Remove'");
+            }
+        });
     });
 
-    $("#people").html(items.join( "" ));
-
-    $("button" ).click(function() {
-        const user = $( this ).attr('user');
-        const computer = $( this ).attr('computer');
-        const action = $( '#' + user + ' input[name="action"]:checked').val();
-        const seconds = $( this ).val();
-        if(action !== undefined){
-            add_or_remove_time(user, computer, action, seconds);
+    function add_or_remove_time(user, computer, action, seconds){
+        let form;
+        if(action === 'add'){
+            form = 'increase_time'
         } else {
-            alert("Choose 'Add' or 'Remove'");
+            form = 'decrease_time'
         }
-    });
-});
-
-function add_or_remove_time(user, computer, action, seconds){
-    let form;
-    if(action === 'add'){
-        form = 'increase_time'
-    } else {
-        form = 'decrease_time'
+        $.getJSON("/" + form + "/" + computer + "/" + user + "/" + seconds, function( data ) {
+            $('#' + user + " #usage").html(secondsToHms(data.usage));
+        });
     }
-    $.getJSON("/" + form + "/" + computer + "/" + user + "/" + seconds, function( data ) {
-        $('#' + user + " #usage").html(secondsToHms(data.usage));
-    });
-}
 
-function get_usage(user, computer){
-    return $.ajax({
-        type: "GET",
-        url: "/get_usage/" + computer + "/" + user,
-        async: false
-    }).responseText;
-}
-
-// thanks https://stackoverflow.com/a/37096512 !
-function secondsToHms(d) {
-    if (Number(d) === 0){
-        return "none";
+    function get_usage(user, computer){
+        return $.ajax({
+            type: "GET",
+            url: "/get_usage/" + computer + "/" + user,
+            async: false
+        }).responseText;
     }
-    d = Number(d);
-    var h = Math.floor(d / 3600);
-    var m = Math.floor(d % 3600 / 60);
-    var s = Math.floor(d % 3600 % 60);
 
-    var hDisplay = h > 0 ? h + (h === 1 ? " hr " : " hrs ") : "";
-    var mDisplay = m > 0 ? m + (m === 1 ? " min " : " mins ") : "";
-    var sDisplay = s > 0 ? s + (s === 1 ? " sec" : " secs") : "";
-    return hDisplay + mDisplay + sDisplay;
-}
+    // thanks https://stackoverflow.com/a/37096512 !
+    function secondsToHms(d) {
+        if (Number(d) === 0){
+            return "none";
+        }
+        d = Number(d);
+        var h = Math.floor(d / 3600);
+        var m = Math.floor(d % 3600 / 60);
+        var s = Math.floor(d % 3600 % 60);
 
-</script>
-</body>
+        var hDisplay = h > 0 ? h + (h === 1 ? " hr " : " hrs ") : "";
+        var mDisplay = m > 0 ? m + (m === 1 ? " min " : " mins ") : "";
+        var sDisplay = s > 0 ? s + (s === 1 ? " sec" : " secs") : "";
+        return hDisplay + mDisplay + sDisplay;
+    }
+
+    </script>
+  </body>
 </html>
+
+
+
+
