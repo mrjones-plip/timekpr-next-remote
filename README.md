@@ -1,6 +1,6 @@
 # Timekpr-nExT Remote
 
-A web based interface written in python for easily adding or removing time for users of [Timekpr-nExT](https://mjasnik.gitlab.io/timekpr-next/). The primary goal is to allow parents to use their phone to easily give more computer time to their child(ren). Works on Desktop or Mobile:
+A dockerized web app, written in python, for easily adding or removing time for users of [Timekpr-nExT](https://mjasnik.gitlab.io/timekpr-next/). The primary goal is to allow parents to use their phone to easily give more computer time to their child(ren). Works on Desktop or Mobile:
 
 
 Features:
