@@ -9,4 +9,4 @@ services:
       - "./conf.py:/app/conf.py"
     restart: unless-stopped
     ports:
-      - "${TIMEKPR_PORT:-8080}:8080"
+      - "${TIMEKPR_IP:-0.0.0.0}:${TIMEKPR_PORT:-8080}:8080"
