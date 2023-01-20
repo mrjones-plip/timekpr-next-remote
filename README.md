@@ -81,7 +81,7 @@ By design, this system is very secure as far as controlling clients over SSH, bu
 * [timekprw](https://github.com/nvsmirnov/timekprw) - defunct as it dependent on an [appspot page]( https://timekprw.ew.r.appspot.com ) which is dead
 * [timekpr-server](https://github.com/frohmut/timekpr-server )- "Sample config server implementations and HTML UI for Timekpr"
 * [timekpr](https://github.com/frohmut/timekpr) - "Timekpr-Sync: Timekpr extension to spread user configurations in the home network"
-* [timekpr-cli](https://github.com/cisba/timekpr-cli - "Simple Timekpr CLI" - local python wrapper script)
+* [timekpr-cli](https://github.com/cisba/timekpr-cli) - "Simple Timekpr CLI" - local python wrapper script)
 
 ## Development
 
