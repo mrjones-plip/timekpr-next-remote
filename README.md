@@ -65,7 +65,7 @@ By design, this system is very secure as far as controlling clients over SSH, bu
 * if you want to ensure the SSH user on the server can not do anything more than run `timekpra`, then you can restrict this in [the `authorized_keys` file on each client](https://www.virtono.com/community/tutorial-how-to/restrict-executable-ssh-commands-with-authorized-keys/).
 * Run  something like [Traefik](https://github.com/traefik/traefik/) or [Caddy](https://caddyserver.com/) in another docker container.  From there you can bind the timekpr-next remote server to the host docker IP with something like `TIMEKPR_IP=172.17.0.1 docker compose up -d`.  It will no longer be available on the network, only only via the revers proxy you set up.
 
-   You can then either use `basicauth` ([eg in Caddy](https://caddyserver.com/docs/caddyfile/directives/basicauth)) or what I did is make a host name that is unguessable like `https://user-time-8957446623432192758492038.domain.com`.  Everone just bookmarks this.  Even if your kids see the URL, they won't be able to remember it.
+   You can then either use `basicauth` ([eg in Caddy](https://caddyserver.com/docs/caddyfile/directives/basicauth)) or what I did is make a host name that is unguessable like `https://user-time-8957446623432192758492038.domain.com`.  Everyone just bookmarks this.  Even if your kids see the URL, they won't be able to remember it.
 
 
 ## Todo
