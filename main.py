@@ -4,6 +4,7 @@
 import conf, re
 from fabric import Connection
 from paramiko.ssh_exception import AuthenticationException
+from paramiko.ssh_exception import NoValidConnectionsError
 
 
 def get_config():
@@ -12,10 +13,16 @@ def get_config():
 
 def get_usage(user, computer, ssh):
     # to do - maybe check if user is in timekpr first? (/usr/bin/timekpra --userlist)
-    timekpra_userinfo_output = str(ssh.run(
-            conf.ssh_timekpra_bin + ' --userinfo ' + user,
-            hide=True
-        ))
+    global timekpra_userinfo_output
+    try:
+        timekpra_userinfo_output = str(ssh.run(
+                conf.ssh_timekpra_bin + ' --userinfo ' + user,
+                hide=True
+            ))
+    except NoValidConnectionsError as e:
+        print(f"Cannot connect to SSH server on host '{computer}'. "
+              f"Check address in conf.py or try again later.")
+        return {'time_left': 0, 'time_spent': 0, 'result': 'fail'}
     search = r"(TIME_LEFT_DAY: )([0-9]+)"
     time_left = re.search(search, timekpra_userinfo_output)
     search = r"(TIME_SPENT_DAY: )([0-9]+)"
@@ -30,7 +37,7 @@ def get_usage(user, computer, ssh):
         time_spent = str(time_spent.group(2))
 
     print(f"Time left for {user} at {computer}: {time_spent}")
-    return {'time_left': time_left, 'time_spent': time_spent}
+    return {'time_left': time_left, 'time_spent': time_spent, 'result': 'success'}
 
 
 def get_connection(computer):
@@ -49,9 +56,9 @@ def get_connection(computer):
         )
     except AuthenticationException as e:
         quit(f"Wrong credentials for user '{conf.ssh_user}' on host '{computer}'. "
-              f"Check `ssh_user` and `ssh_password` credentials in config.py.")
+              f"Check `ssh_user` and `ssh_password` credentials in conf.py.")
     except Exception as e:
-        quit(f"Error logging in as user '{conf.ssh_user}' on host '{computer}', check config. \n\n\t" + str(e))
+        quit(f"Error logging in as user '{conf.ssh_user}' on host '{computer}', check conf.py. \n\n\t" + str(e))
     finally:
         return connection
 

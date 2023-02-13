@@ -16,6 +16,14 @@
                 color: blue;
                 margin-left: 4px;
             }
+            .error {
+                color: red;
+                margin-left: 4px;
+            }
+            .user {
+                padding-bottom: 15px;
+                display: block;
+            }
 
             /* ==========================================================================
                Fork Me on Github Stuffs
@@ -108,100 +116,115 @@
     <script src="{{ url_for('static', filename='bootstrap.5.1.3.min.js') }}"></script>
     <script src="{{ url_for('static', filename='jquery-3.6.3.min.js') }}"></script>
     <script>
-    $.getJSON( "/config", function( data ) {
-        const items = [];
-        const second_options = [300, 900, 1800, 2700, 3600];
-        $.each( data, function( computer, user ) {
-            let usage = $.parseJSON(get_usage(user, computer));
-            items.push(
-                "<span class='user' id='"+ user + "'>" +
-                    "<p  class='h3'>" + user  + "<span class='notify'>Updated!</span><p>" +
-                    "<span>Unused: <span class='time' id='time_left'>" + secondsToHms(usage.time_left) + "</span> </span>" +
-                    "<span>Used: <span class='time'  id='time_spent'>" + secondsToHms(usage.time_spent) + "</span></span><br/>" +
-                    "<div class='btn-group' role='group' aria-label='Action'>" +
-                        "<input type='radio'  class='btn-check' id='add' value='add' name='action' />" +
-                        "<label  class='btn btn-outline-primary' for='add'>Add</label>" +
-                        "<input type='radio'  class='btn-check' id='remove' value='remove' name='action' />" +
-                        "<label  class='btn btn-outline-primary' for='remove'>Remove</label> " +
-                    "</div> " +
-                    "<div class='btn-group' role='group' aria-label='Times'>"
+        $.getJSON( "/config", function( data ) {
+            $.each( data, function( computer, user ) {
+                $("#people").append(
+                    "<span class='user' id='" + user + "'>" +
+                    "<p  class='h3'>" + user + "<span class='notify'>&nbsp;</span></p>" +
+                    "<span>Unused: <span class='time' id='time_left'>...</span> </span>" +
+                    "<span>Used: <span class='time'  id='time_spent'>...</span></span><br/>"
                 );
-            $.each(second_options, function(index, seconds) {
-                items.push(
-                    "<input type='radio'  class='btn-check'  value='" + seconds + "' id='the" + seconds + "' name='seconds' />" +
-                    "<label  class='btn btn-outline-primary' for='the" + seconds + "'>" + secondsToHms(seconds) + "</label>");
+                let usage = $.parseJSON(get_usage(user, computer));
+                console.log("got results for user:", user);
+                render_user_to_dom(user, computer, usage);
             });
-            items.push(
+
+            $(".save_me" ).click(function() {
+                const user = $( this ).attr('user');
+                const computer = $( this ).attr('computer');
+                const action = $( '#' + user + ' input[name="action"]:checked').val();
+                const seconds = $( '#' + user + ' input[name="seconds"]:checked').val();
+                if(action !== undefined && seconds !== undefined){
+                    $('input').prop('checked', false);
+                    add_or_remove_time(user, computer, action, seconds);
+                    $( '#' + user + ' .notify').html('Updated!').fadeIn(function() {
+                        setTimeout(function() {
+                            $('#' + user + ' .notify').fadeOut("slow");
+                        }, 1000);
+                    });
+                } else {
+                    alert("Choose 'Add' or 'Remove' and choose an amount of time to add.");
+                }
+            });
+        });
+
+        function render_user_to_dom(user, computer, usage){
+            const second_options = [300, 900, 1800, 2700, 3600];
+            let times = ''
+            $.each(second_options, function (index, seconds) {
+                times = times + "<input type='radio'  class='btn-check'  value='" + seconds + "' id='the" + seconds + "' name='seconds' />" +
+                    "<label  class='btn btn-outline-primary' for='the" + seconds + "'>" + secondsToHms(seconds) + "</label>";
+            });
+            if(usage.result === 'success') {
+                $('#' + user + " #time_left").html(secondsToHms(usage.time_left));
+                $('#' + user + " #time_spent").html(secondsToHms(usage.time_spent));
+                $("#" + user).append(
+                    "<div class='btn-group' role='group' aria-label='Action'>" +
+                    "<input type='radio'  class='btn-check' id='add' value='add' name='action' />" +
+                    "<label  class='btn btn-outline-primary' for='add'>Add</label>" +
+                    "<input type='radio'  class='btn-check' id='remove' value='remove' name='action' />" +
+                    "<label  class='btn btn-outline-primary' for='remove'>Remove</label> " +
+                    "</div> " +
+                    "<div class='btn-group' role='group' aria-label='Times'>" +
+                    times +
                     "</div>" +
                     "<div class='btn-group' role='group' aria-label='save'>" +
-                        "<button class='btn btn-outline-primary' " +
-                            "id='save_me' value='save' user='" + user + "' computer='" + computer + "' >Save</button>" +
+                    "<button class='btn btn-outline-primary save_me' " +
+                    "value='save' user='" + user + "' computer='" + computer + "' >Save</button>" +
                     "</div> " +
-                "</span>"
+                    "</span>"
                 );
-            get_usage();
-        });
-
-        $("#people").html(items.join( "" ));
-
-        $("#save_me" ).click(function() {
-            const user = $( this ).attr('user');
-            const computer = $( this ).attr('computer');
-            const action = $( '#' + user + ' input[name="action"]:checked').val();
-            const seconds = $( '#' + user + ' input[name="seconds"]:checked').val();
-            if(action !== undefined && seconds !== undefined){
-                $('input').prop('checked', false);
-                add_or_remove_time(user, computer, action, seconds);
-                $( '#' + user + ' .notify').fadeIn(function() {
-                    setTimeout(function() {
-                        $('#' + user + ' .notify').fadeOut("slow");
-                    }, 1000);
-                });
             } else {
-                alert("Choose 'Add' or 'Remove' and choose an amount of time to add.");
+                $("#" + user).html(
+                    "<p  class='h3'>" + user + "<span class='error'>Error</span></p>" +
+                    "<span>" +
+                    "   <span class='time' >Failed to connect to " + computer + ", it may be off.</span> " +
+                    "</span>"
+                );
             }
-        });
-    });
-
-    function add_or_remove_time(user, computer, action, seconds){
-        let form;
-        if(action === 'add'){
-            form = 'increase_time'
-        } else {
-            form = 'decrease_time'
         }
-        console.log("add_or_remove_time callded: form", form,"computer", computer,"user",user,"seconds",seconds);
-        $.getJSON("/" + form + "/" + computer + "/" + user + "/" + seconds, function( data ) {
-            $('#' + user + " #time_left").html(secondsToHms(data.time_left));
-            $('#' + user + " #time_spent").html(secondsToHms(data.time_spent));
-        });
-    }
 
-    function get_usage(user, computer){
-        return $.ajax({
-            type: "GET",
-            url: "/get_usage/" + computer + "/" + user,
-            async: false
-        }).responseText;
-    }
-
-    // thanks https://stackoverflow.com/a/37096512 !
-    function secondsToHms(d) {
-        if (Number(d) === 0){
-            return "none";
+        function add_or_remove_time(user, computer, action, seconds){
+            let form;
+            if(action === 'add'){
+                form = 'increase_time'
+            } else {
+                form = 'decrease_time'
+            }
+            console.log("add_or_remove_time callded: form", form,"computer", computer,"user",user,"seconds",seconds);
+            $.getJSON("/" + form + "/" + computer + "/" + user + "/" + seconds, function( data ) {
+                $('#' + user + " #time_left").html(secondsToHms(data.time_left));
+                $('#' + user + " #time_spent").html(secondsToHms(data.time_spent));
+            });
         }
-        d = Number(d);
-        var h = Math.floor(d / 3600);
-        var m = Math.floor(d % 3600 / 60);
-        var s = Math.floor(d % 3600 % 60);
 
-        var hDisplay = h > 0 ? h + (h === 1 ? " hr " : " hrs ") : "";
-        var mDisplay = m > 0 ? m + (m === 1 ? " min " : " mins ") : "";
-        var sDisplay = s > 0 ? s + (s === 1 ? " sec" : " secs") : "";
-        return hDisplay + mDisplay + sDisplay;
-    }
+        function get_usage(user, computer){
+            return $.ajax({
+                type: "GET",
+                url: "/get_usage/" + computer + "/" + user,
+                async: false
+            }).responseText;
+        }
+
+        // thanks https://stackoverflow.com/a/37096512 !
+        function secondsToHms(d) {
+            if (Number(d) === 0){
+                return "none";
+            }
+            d = Number(d);
+            var h = Math.floor(d / 3600);
+            var m = Math.floor(d % 3600 / 60);
+            var s = Math.floor(d % 3600 % 60);
+
+            var hDisplay = h > 0 ? h + (h === 1 ? " hr " : " hrs ") : "";
+            var mDisplay = m > 0 ? m + (m === 1 ? " min " : " mins ") : "";
+            var sDisplay = s > 0 ? s + (s === 1 ? " sec" : " secs") : "";
+            return hDisplay + mDisplay + sDisplay;
+        }
 
     </script>
+    <script src="{{ url_for('static', filename='bootstrap.5.1.3.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='jquery-3.6.3.min.js') }}"></script>
   </body>
 </html>
 
