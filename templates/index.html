@@ -111,7 +111,7 @@
   </header>
 
   <div class="b-example-divider"></div>
-    <div id="people"></div>
+  <div id="people"></div>
 </div>
     <script src="{{ url_for('static', filename='bootstrap.5.1.3.min.js') }}"></script>
     <script src="{{ url_for('static', filename='jquery-3.6.3.min.js') }}"></script>
@@ -124,9 +124,12 @@
                     "<span>Unused: <span class='time' id='time_left'>...</span> </span>" +
                     "<span>Used: <span class='time'  id='time_spent'>...</span></span><br/>"
                 );
-                let usage = $.parseJSON(get_usage(user, computer));
-                console.log("got results for user:", user);
-                render_user_to_dom(user, computer, usage);
+
+                $('#' + user + " .notify").show().html("Loading...");
+                $.getJSON( "/get_usage/" + computer + "/" + user, function( usage ) {
+                    console.log("got results for user:", user);
+                    render_user_to_dom(user, computer, usage);
+                });
             });
 
             $(".save_me" ).click(function() {
@@ -156,6 +159,11 @@
                     "<label  class='btn btn-outline-primary' for='the" + seconds + "'>" + secondsToHms(seconds) + "</label>";
             });
             if(usage.result === 'success') {
+                $( '#' + user + ' .notify').fadeOut().html('Loaded!').fadeIn(function() {
+                    setTimeout(function() {
+                        $('#' + user + ' .notify').fadeOut("slow");
+                    }, 1000);
+                });
                 $('#' + user + " #time_left").html(secondsToHms(usage.time_left));
                 $('#' + user + " #time_spent").html(secondsToHms(usage.time_spent));
                 $("#" + user).append(
@@ -196,14 +204,6 @@
                 $('#' + user + " #time_left").html(secondsToHms(data.time_left));
                 $('#' + user + " #time_spent").html(secondsToHms(data.time_spent));
             });
-        }
-
-        function get_usage(user, computer){
-            return $.ajax({
-                type: "GET",
-                url: "/get_usage/" + computer + "/" + user,
-                async: false
-            }).responseText;
         }
 
         // thanks https://stackoverflow.com/a/37096512 !
