@@ -23,6 +23,13 @@ def get_usage(user, computer, ssh):
         print(f"Cannot connect to SSH server on host '{computer}'. "
               f"Check address in conf.py or try again later.")
         return {'time_left': 0, 'time_spent': 0, 'result': 'fail'}
+    except AuthenticationException as e:
+        print(f"Wrong credentials for user '{conf.ssh_user}' on host '{computer}'. "
+              f"Check `ssh_user` and `ssh_password` credentials in conf.py.")
+        return {'time_left': 0, 'time_spent': 0, 'result': 'fail'}
+    except Exception as e:
+        quit(f"Error logging in as user '{conf.ssh_user}' on host '{computer}', check conf.py. \n\n\t" + str(e))
+        return {'time_left': 0, 'time_spent': 0, 'result': 'fail'}
     search = r"(TIME_LEFT_DAY: )([0-9]+)"
     time_left = re.search(search, timekpra_userinfo_output)
     search = r"(TIME_SPENT_DAY: )([0-9]+)"

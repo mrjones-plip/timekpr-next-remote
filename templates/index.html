@@ -16,6 +16,9 @@
                 color: blue;
                 margin-left: 4px;
             }
+            .loading {
+                color: lightgray;
+            }
             .error {
                 color: red;
                 margin-left: 4px;
@@ -120,14 +123,17 @@
             $.each( data, function( computer, user ) {
                 $("#people").append(
                     "<span class='user' id='" + user + "'>" +
-                    "<p  class='h3'>" + user + "<span class='notify'>&nbsp;</span></p>" +
+                    "<p  class='h3'>" + user + "<span class='notify loading'></span></p>" +
                     "<span>Unused: <span class='time' id='time_left'>...</span> </span>" +
                     "<span>Used: <span class='time'  id='time_spent'>...</span></span><br/>"
                 );
 
                 $('#' + user + " .notify").show().html("Loading...");
+
+                setInterval(function () {
+                    $('#' + user + " .loading").fadeIn(1300).fadeOut(1300);
+                }, 1400);
                 $.getJSON( "/get_usage/" + computer + "/" + user, function( usage ) {
-                    console.log("got results for user:", user);
                     render_user_to_dom(user, computer, usage);
                 });
             });
@@ -166,6 +172,7 @@
                 });
                 $('#' + user + " #time_left").html(secondsToHms(usage.time_left));
                 $('#' + user + " #time_spent").html(secondsToHms(usage.time_spent));
+                $('#' + user + " .loading").removeClass('loading');
                 $("#" + user).append(
                     "<div class='btn-group' role='group' aria-label='Action'>" +
                     "<input type='radio'  class='btn-check' id='add' value='add' name='action' />" +
