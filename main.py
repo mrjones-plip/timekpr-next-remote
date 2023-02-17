@@ -45,7 +45,7 @@ def get_usage(user, computer, ssh):
         time_spent = str(time_spent.group(2))
         result = 'success'
 
-    print(f"Time left for {user} at {computer}: {time_spent}")
+    print(f"Time left for {user} at {computer}: {time_left}")
     return {'time_left': time_left, 'time_spent': time_spent, 'result': result}
 
 
