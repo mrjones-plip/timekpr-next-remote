@@ -131,6 +131,7 @@
             $.each( data, function( computer, user ) {
                 rand_dom = '_' + uuidv4();
                 times = get_times(rand_dom);
+                // todo - click doesn't work and radio spans accross users'
                 $("#people").append(
                     "<span class='user' id='" + user + "'>" +
                         "<p  class='h3'>" + user + "<span class='notify loading'></span></p>" +
