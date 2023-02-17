@@ -27,6 +27,13 @@
                 padding-bottom: 15px;
                 display: block;
             }
+            .disabled {
+                 border: 1px solid #ddd !important;
+                 color: #ccc !important;
+             }
+            .failed_load {
+                height: 62px;
+            }
 
             /* ==========================================================================
                Fork Me on Github Stuffs
@@ -120,15 +127,37 @@
     <script src="{{ url_for('static', filename='jquery-3.6.3.min.js') }}"></script>
     <script>
         $.getJSON( "/config", function( data ) {
+            let times, rand_dom;
             $.each( data, function( computer, user ) {
+                rand_dom = '_' + uuidv4();
+                times = get_times(rand_dom);
                 $("#people").append(
                     "<span class='user' id='" + user + "'>" +
-                    "<p  class='h3'>" + user + "<span class='notify loading'></span></p>" +
-                    "<span>Unused: <span class='time' id='time_left'>...</span> </span>" +
-                    "<span>Used: <span class='time'  id='time_spent'>...</span></span><br/>"
+                        "<p  class='h3'>" + user + "<span class='notify loading'></span></p>" +
+                        "<span class='time_wrapper'>" +
+                            "Unused: <span class='time time_left'>...</span> " +
+                            "Used: " +
+                                "<span class='time time_spent'>...</span>" +
+                        "</span><br/>" +
+                        "<div class='btn-group' role='group' aria-label='Action'>" +
+                            "<input type='radio'  class='btn-check' id='add" + rand_dom + "' value='add' name='action' />" +
+                            "<label  class='btn btn-outline-primary' for='add" + rand_dom + "'>Add</label>" +
+                            "<input type='radio'  class='btn-check' id='remove" + rand_dom + "' value='remove' name='action' />" +
+                            "<label  class='btn btn-outline-primary' for='remove" + rand_dom + "'>Remove</label> " +
+                        "</div> " +
+                        "<div class='btn-group' role='group' aria-label='Times'>" +
+                            times +
+                        "</div>" +
+                        "<div class='btn-group' role='group' aria-label='save'>" +
+                            "<button class='btn btn-outline-primary save_me' " +
+                                "value='save' user='" + user + "' computer='" + computer + "' >Save</button>" +
+                        "</div> " +
+                    "</span>"
                 );
 
                 $('#' + user + " .notify").show().html("Loading...");
+                $('#' + user + ' .btn').addClass("disabled");
+                $('#' + user + ' .btn-check').addClass("disabled");
 
                 setInterval(function () {
                     $('#' + user + " .loading").fadeIn(1300).fadeOut(1300);
@@ -137,8 +166,27 @@
                     render_user_to_dom(user, computer, usage);
                 });
             });
+        });
 
+        function get_times(rand_dom){
+            const second_options = [300, 900, 1800, 2700, 3600];
+            let times = '';
+            $.each(second_options, function (index, seconds) {
+                times = times + "<input type='radio'  class='btn-check'  value='" + seconds + "' id='" + seconds +  rand_dom + "' name='seconds' />" +
+                    "<label  class='btn btn-outline-primary' for='" + seconds  +  rand_dom +  "'>" + secondsToHms(seconds) + "</label>";
+            });
+            return times;
+        }
+        function uuidv4() {
+            return 'xxxxx'.replace(/[xy]/g, function(c) {
+                var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        function add_click_handler(){
             $(".save_me" ).click(function() {
+                console.log('test');
                 const user = $( this ).attr('user');
                 const computer = $( this ).attr('computer');
                 const action = $( '#' + user + ' input[name="action"]:checked').val();
@@ -155,48 +203,29 @@
                     alert("Choose 'Add' or 'Remove' and choose an amount of time to add.");
                 }
             });
-        });
+        }
 
         function render_user_to_dom(user, computer, usage){
-            const second_options = [300, 900, 1800, 2700, 3600];
-            let times = ''
-            $.each(second_options, function (index, seconds) {
-                times = times + "<input type='radio'  class='btn-check'  value='" + seconds + "' id='the" + seconds + "' name='seconds' />" +
-                    "<label  class='btn btn-outline-primary' for='the" + seconds + "'>" + secondsToHms(seconds) + "</label>";
-            });
             if(usage.result === 'success') {
                 $( '#' + user + ' .notify').fadeOut().html('Loaded!').fadeIn(function() {
                     setTimeout(function() {
                         $('#' + user + ' .notify').fadeOut("slow");
                     }, 1000);
                 });
-                $('#' + user + " #time_left").html(secondsToHms(usage.time_left));
-                $('#' + user + " #time_spent").html(secondsToHms(usage.time_spent));
+                $('#' + user + " .time_left").html(secondsToHms(usage.time_left));
+                $('#' + user + " .time_spent").html(secondsToHms(usage.time_spent));
                 $('#' + user + " .loading").removeClass('loading');
-                $("#" + user).append(
-                    "<div class='btn-group' role='group' aria-label='Action'>" +
-                    "<input type='radio'  class='btn-check' id='add' value='add' name='action' />" +
-                    "<label  class='btn btn-outline-primary' for='add'>Add</label>" +
-                    "<input type='radio'  class='btn-check' id='remove' value='remove' name='action' />" +
-                    "<label  class='btn btn-outline-primary' for='remove'>Remove</label> " +
-                    "</div> " +
-                    "<div class='btn-group' role='group' aria-label='Times'>" +
-                    times +
-                    "</div>" +
-                    "<div class='btn-group' role='group' aria-label='save'>" +
-                    "<button class='btn btn-outline-primary save_me' " +
-                    "value='save' user='" + user + "' computer='" + computer + "' >Save</button>" +
-                    "</div> " +
-                    "</span>"
-                );
+                $('#' + user + ' .btn').removeClass("disabled");
+                $('#' + user + ' .btn-check').removeClass("disabled");
+                add_click_handler();
             } else {
-                $("#" + user).html(
-                    "<p  class='h3'>" + user + "<span class='error'>Error</span></p>" +
-                    "<span>" +
-                    "   <span class='time' >Failed to connect to " + computer + ", it may be off.</span> " +
-                    "</span>"
-                );
+                $('#' + user + " .time_wrapper").html("Connection to " + computer + " failed. Off? Conf.py wrong");
+                $('#' + user + " .notify").addClass("error").html("Error");
             }
+        }
+
+        function get_buttons(user, computer, state = 'enabled'){
+
         }
 
         function add_or_remove_time(user, computer, action, seconds){
@@ -208,8 +237,8 @@
             }
             console.log("add_or_remove_time callded: form", form,"computer", computer,"user",user,"seconds",seconds);
             $.getJSON("/" + form + "/" + computer + "/" + user + "/" + seconds, function( data ) {
-                $('#' + user + " #time_left").html(secondsToHms(data.time_left));
-                $('#' + user + " #time_spent").html(secondsToHms(data.time_spent));
+                $('#' + user + " .time_left").html(secondsToHms(data.time_left));
+                $('#' + user + " .time_spent").html(secondsToHms(data.time_spent));
             });
         }
 

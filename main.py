@@ -39,12 +39,14 @@ def get_usage(user, computer, ssh):
         print(f"Error getting time left, setting to 0. ssh call result: " + str(timekpra_userinfo_output))
         time_left = '0'
         time_spent = '0'
+        result = 'fail'
     else:
         time_left = str(time_left.group(2))
         time_spent = str(time_spent.group(2))
+        result = 'success'
 
     print(f"Time left for {user} at {computer}: {time_spent}")
-    return {'time_left': time_left, 'time_spent': time_spent, 'result': 'success'}
+    return {'time_left': time_left, 'time_spent': time_spent, 'result': result}
 
 
 def get_connection(computer):
