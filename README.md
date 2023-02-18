@@ -70,11 +70,13 @@ By design, this system is very secure as far as controlling clients over SSH, bu
 
 ## Todo
 
-* [ ] enable more than one user per machine
 * [ ] add PIN protection in web GUI
 * [ ] add "refresh" button per client in web GUI
-* [ ] better error handling when SSH fails etc.
-* [ ] support ssh keys 
+* [ ] support ssh keys
+* [X] enable more than one user per machine
+* [X] better error handling when SSH fails etc.
+* [X] AJAX async loading
+* [X] handle identically named users on diff servers
 
 ## Related projects
 
