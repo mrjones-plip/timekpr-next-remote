@@ -4,6 +4,7 @@
 import conf, re
 from fabric import Connection
 from paramiko.ssh_exception import AuthenticationException
+from paramiko.ssh_exception import NoValidConnectionsError
 
 
 def get_config():
@@ -12,10 +13,24 @@ def get_config():
 
 def get_usage(user, computer, ssh):
     # to do - maybe check if user is in timekpr first? (/usr/bin/timekpra --userlist)
-    timekpra_userinfo_output = str(ssh.run(
-            conf.ssh_timekpra_bin + ' --userinfo ' + user,
-            hide=True
-        ))
+    global timekpra_userinfo_output
+    fail_json = {'time_left': 0, 'time_spent': 0, 'result': 'fail'}
+    try:
+        timekpra_userinfo_output = str(ssh.run(
+                conf.ssh_timekpra_bin + ' --userinfo ' + user,
+                hide=True
+            ))
+    except NoValidConnectionsError as e:
+        print(f"Cannot connect to SSH server on host '{computer}'. "
+              f"Check address in conf.py or try again later.")
+        return fail_json
+    except AuthenticationException as e:
+        print(f"Wrong credentials for user '{conf.ssh_user}' on host '{computer}'. "
+              f"Check `ssh_user` and `ssh_password` credentials in conf.py.")
+        return fail_json
+    except Exception as e:
+        quit(f"Error logging in as user '{conf.ssh_user}' on host '{computer}', check conf.py. \n\n\t" + str(e))
+        return fail_json
     search = r"(TIME_LEFT_DAY: )([0-9]+)"
     time_left = re.search(search, timekpra_userinfo_output)
     search = r"(TIME_SPENT_DAY: )([0-9]+)"
@@ -23,14 +38,12 @@ def get_usage(user, computer, ssh):
     # todo - better handle "else" when we can't find time remaining
     if not time_left or not time_left.group(2):
         print(f"Error getting time left, setting to 0. ssh call result: " + str(timekpra_userinfo_output))
-        time_left = '0'
-        time_spent = '0'
+        return fail_json
     else:
         time_left = str(time_left.group(2))
         time_spent = str(time_spent.group(2))
-
-    print(f"Time left for {user} at {computer}: {time_spent}")
-    return {'time_left': time_left, 'time_spent': time_spent}
+        print(f"Time left for {user} at {computer}: {time_left}")
+        return {'time_left': time_left, 'time_spent': time_spent, 'result': 'success'}
 
 
 def get_connection(computer):
@@ -49,9 +62,9 @@ def get_connection(computer):
         )
     except AuthenticationException as e:
         quit(f"Wrong credentials for user '{conf.ssh_user}' on host '{computer}'. "
-              f"Check `ssh_user` and `ssh_password` credentials in config.py.")
+              f"Check `ssh_user` and `ssh_password` credentials in conf.py.")
     except Exception as e:
-        quit(f"Error logging in as user '{conf.ssh_user}' on host '{computer}', check config. \n\n\t" + str(e))
+        quit(f"Error logging in as user '{conf.ssh_user}' on host '{computer}', check conf.py. \n\n\t" + str(e))
     finally:
         return connection
 

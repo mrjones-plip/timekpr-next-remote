@@ -16,6 +16,24 @@
                 color: blue;
                 margin-left: 4px;
             }
+            .loading {
+                color: lightgray;
+            }
+            .error {
+                color: red;
+                margin-left: 4px;
+            }
+            .user {
+                padding-bottom: 15px;
+                display: block;
+            }
+            .disabled {
+                 border: 1px solid #ddd !important;
+                 color: #ccc !important;
+             }
+            .failed_load {
+                height: 62px;
+            }
 
             /* ==========================================================================
                Fork Me on Github Stuffs
@@ -103,105 +121,143 @@
   </header>
 
   <div class="b-example-divider"></div>
-    <div id="people"></div>
+  <div id="people"></div>
 </div>
     <script src="{{ url_for('static', filename='bootstrap.5.1.3.min.js') }}"></script>
     <script src="{{ url_for('static', filename='jquery-3.6.3.min.js') }}"></script>
     <script>
-    $.getJSON( "/config", function( data ) {
-        const items = [];
-        const second_options = [300, 900, 1800, 2700, 3600];
-        $.each( data, function( computer, user ) {
-            let usage = $.parseJSON(get_usage(user, computer));
-            items.push(
-                "<span class='user' id='"+ user + "'>" +
-                    "<p  class='h3'>" + user  + "<span class='notify'>Updated!</span><p>" +
-                    "<span>Unused: <span class='time' id='time_left'>" + secondsToHms(usage.time_left) + "</span> </span>" +
-                    "<span>Used: <span class='time'  id='time_spent'>" + secondsToHms(usage.time_spent) + "</span></span><br/>" +
-                    "<div class='btn-group' role='group' aria-label='Action'>" +
-                        "<input type='radio'  class='btn-check' id='add' value='add' name='action' />" +
-                        "<label  class='btn btn-outline-primary' for='add'>Add</label>" +
-                        "<input type='radio'  class='btn-check' id='remove' value='remove' name='action' />" +
-                        "<label  class='btn btn-outline-primary' for='remove'>Remove</label> " +
-                    "</div> " +
-                    "<div class='btn-group' role='group' aria-label='Times'>"
+        $.getJSON( "/config", function( data ) {
+            $.each( data, function( computer, user ) {
+                let rand_dom = '_' + uuidv4();
+                let times = get_times(rand_dom);
+                // todo - click doesn't work and radio spans accross users'
+                $("#people").append(
+                    "<span class='user' id='" + user + rand_dom + "'>" +
+                        "<p  class='h3'>" + user + "<span class='notify loading'></span></p>" +
+                        "<span class='time_wrapper'>" +
+                            "Unused: <span class='time time_left'>...</span> " +
+                            "Used: " +
+                                "<span class='time time_spent'>...</span>" +
+                        "</span><br/>" +
+                        "<div class='btn-group' role='group' aria-label='Action'>" +
+                            "<input type='radio'  class='btn-check' id='add" + rand_dom + "' value='add' name='action' />" +
+                            "<label  class='btn btn-outline-primary' for='add" + rand_dom + "'>Add</label>" +
+                            "<input type='radio'  class='btn-check' id='remove" + rand_dom + "' value='remove' name='action' />" +
+                            "<label  class='btn btn-outline-primary' for='remove" + rand_dom + "'>Remove</label> " +
+                        "</div> " +
+                        "<div class='btn-group' role='group' aria-label='Times'>" +
+                            times +
+                        "</div>" +
+                        "<div class='btn-group' role='group' aria-label='save'>" +
+                            "<button class='btn btn-outline-primary save_me' " +
+                                "value='save' user='" + user + "' computer='" + computer + "' >Save</button>" +
+                        "</div> " +
+                    "</span>"
                 );
-            $.each(second_options, function(index, seconds) {
-                items.push(
-                    "<input type='radio'  class='btn-check'  value='" + seconds + "' id='the" + seconds + "' name='seconds' />" +
-                    "<label  class='btn btn-outline-primary' for='the" + seconds + "'>" + secondsToHms(seconds) + "</label>");
+
+                $('#' + user  + rand_dom + " .notify").show().html("Loading...");
+                $('#' + user + rand_dom + ' .btn').addClass("disabled");
+                $('#' + user  + rand_dom + ' .btn-check').addClass("disabled");
+
+                setInterval(function () {
+                    $('#' + user  + rand_dom + " .loading").fadeIn(1300).fadeOut(1300);
+                }, 1400);
+                $.getJSON( "/get_usage/" + computer + "/" + user, function( usage ) {
+                    render_user_to_dom(user, computer, usage, rand_dom);
+                });
             });
-            items.push(
-                    "</div>" +
-                    "<div class='btn-group' role='group' aria-label='save'>" +
-                        "<button class='btn btn-outline-primary' " +
-                            "id='save_me' value='save' user='" + user + "' computer='" + computer + "' >Save</button>" +
-                    "</div> " +
-                "</span>"
-                );
-            get_usage();
         });
 
-        $("#people").html(items.join( "" ));
+        function get_times(rand_dom){
+            const second_options = [300, 900, 1800, 2700, 3600];
+            let times = '';
+            $.each(second_options, function (index, seconds) {
+                times = times + "<input type='radio'  class='btn-check'  value='" + seconds + "' id='" + seconds +  rand_dom + "' name='seconds' />" +
+                    "<label  class='btn btn-outline-primary' for='" + seconds  +  rand_dom +  "'>" + secondsToHms(seconds) + "</label>";
+            });
+            return times;
+        }
+        function uuidv4() {
+            return 'xxxxx'.replace(/[xy]/g, function(c) {
+                var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
 
-        $("#save_me" ).click(function() {
-            const user = $( this ).attr('user');
-            const computer = $( this ).attr('computer');
-            const action = $( '#' + user + ' input[name="action"]:checked').val();
-            const seconds = $( '#' + user + ' input[name="seconds"]:checked').val();
-            if(action !== undefined && seconds !== undefined){
-                $('input').prop('checked', false);
-                add_or_remove_time(user, computer, action, seconds);
-                $( '#' + user + ' .notify').fadeIn(function() {
+        function add_click_handler(user, rand_dom){
+            $("#" + user + rand_dom + " .save_me" ).click(function() {
+                const computer = $( this ).attr('computer');
+                const action = $( '#' + user + rand_dom + ' input[name="action"]:checked').val();
+                const seconds = $( '#' + user + rand_dom + ' input[name="seconds"]:checked').val();
+                if(action !== undefined && seconds !== undefined){
+                    $('input').prop('checked', false);
+                    add_or_remove_time(user, computer, action, seconds, rand_dom);
+                    $( '#' + user + rand_dom + ' .notify').html('Updated!').fadeIn(function() {
+                        setTimeout(function() {
+                            $('#' + user + rand_dom + ' .notify').fadeOut("slow");
+                        }, 1000);
+                    });
+                } else {
+                    alert("Choose 'Add' or 'Remove' and choose an amount of time to add.");
+                }
+            });
+        }
+
+        function render_user_to_dom(user, computer, usage, rand_dom){
+            if(usage.result === 'success') {
+                $( '#' + user + rand_dom + ' .notify').fadeOut().html('Loaded!').fadeIn(function() {
                     setTimeout(function() {
-                        $('#' + user + ' .notify').fadeOut("slow");
+                        $('#' + user + rand_dom + ' .notify').fadeOut("slow");
                     }, 1000);
                 });
+                $('#' + user + rand_dom + " .time_left").html(secondsToHms(usage.time_left));
+                $('#' + user + rand_dom + " .time_spent").html(secondsToHms(usage.time_spent));
+                $('#' + user + rand_dom + " .loading").removeClass('loading');
+                $('#' + user + rand_dom + ' .btn').removeClass("disabled");
+                $('#' + user + rand_dom + ' .btn-check').removeClass("disabled");
+                add_click_handler(user, rand_dom);
             } else {
-                alert("Choose 'Add' or 'Remove' and choose an amount of time to add.");
+                $('#' + user + rand_dom + " .time_wrapper").html(computer + " failed. Off? Bad Auth?");
+                $('#' + user + rand_dom + " .notify").addClass("error").html("Error");
             }
-        });
-    });
-
-    function add_or_remove_time(user, computer, action, seconds){
-        let form;
-        if(action === 'add'){
-            form = 'increase_time'
-        } else {
-            form = 'decrease_time'
         }
-        console.log("add_or_remove_time callded: form", form,"computer", computer,"user",user,"seconds",seconds);
-        $.getJSON("/" + form + "/" + computer + "/" + user + "/" + seconds, function( data ) {
-            $('#' + user + " #time_left").html(secondsToHms(data.time_left));
-            $('#' + user + " #time_spent").html(secondsToHms(data.time_spent));
-        });
-    }
 
-    function get_usage(user, computer){
-        return $.ajax({
-            type: "GET",
-            url: "/get_usage/" + computer + "/" + user,
-            async: false
-        }).responseText;
-    }
+        function get_buttons(user, computer, state = 'enabled'){
 
-    // thanks https://stackoverflow.com/a/37096512 !
-    function secondsToHms(d) {
-        if (Number(d) === 0){
-            return "none";
         }
-        d = Number(d);
-        var h = Math.floor(d / 3600);
-        var m = Math.floor(d % 3600 / 60);
-        var s = Math.floor(d % 3600 % 60);
 
-        var hDisplay = h > 0 ? h + (h === 1 ? " hr " : " hrs ") : "";
-        var mDisplay = m > 0 ? m + (m === 1 ? " min " : " mins ") : "";
-        var sDisplay = s > 0 ? s + (s === 1 ? " sec" : " secs") : "";
-        return hDisplay + mDisplay + sDisplay;
-    }
+        function add_or_remove_time(user, computer, action, seconds, rand_dom){
+            let form;
+            if(action === 'add'){
+                form = 'increase_time'
+            } else {
+                form = 'decrease_time'
+            }
+            $.getJSON("/" + form + "/" + computer + "/" + user + "/" + seconds, function( data ) {
+                $('#' + user + rand_dom + " .time_left").html(secondsToHms(data.time_left));
+                $('#' + user + rand_dom + " .time_spent").html(secondsToHms(data.time_spent));
+            });
+        }
+
+        // thanks https://stackoverflow.com/a/37096512 !
+        function secondsToHms(d) {
+            if (Number(d) === 0){
+                return "none";
+            }
+            d = Number(d);
+            var h = Math.floor(d / 3600);
+            var m = Math.floor(d % 3600 / 60);
+            var s = Math.floor(d % 3600 % 60);
+
+            var hDisplay = h > 0 ? h + (h === 1 ? " hr " : " hrs ") : "";
+            var mDisplay = m > 0 ? m + (m === 1 ? " min " : " mins ") : "";
+            var sDisplay = s > 0 ? s + (s === 1 ? " sec" : " secs") : "";
+            return hDisplay + mDisplay + sDisplay;
+        }
 
     </script>
+    <script src="{{ url_for('static', filename='bootstrap.5.1.3.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='jquery-3.6.3.min.js') }}"></script>
   </body>
 </html>
 

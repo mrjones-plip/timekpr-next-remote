@@ -10,3 +10,5 @@ services:
     restart: unless-stopped
     ports:
       - "${TIMEKPR_IP:-0.0.0.0}:${TIMEKPR_PORT:-8080}:8080"
+    environment:
+      TZ: ${TIMEKPR_TZ:-America/Los_Angeles}

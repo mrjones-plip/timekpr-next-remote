@@ -32,7 +32,7 @@ def get_usage(computer, user):
         return validate_request(computer, user), 500
     ssh = main.get_connection(computer)
     usage = main.get_usage(user, computer, ssh)
-    return {'result': "success", "time_left": usage['time_left'], "time_spent": usage['time_spent']}, 200
+    return {'result': usage['result'], "time_left": usage['time_left'], "time_spent": usage['time_spent']}, 200
 
 
 @app.route("/increase_time/<computer>/<user>/<seconds>")
