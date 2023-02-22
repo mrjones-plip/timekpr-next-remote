@@ -9,11 +9,27 @@ Features:
 * Intuitive web app interface is easy to use from any phone in the house
 
 
-## Screenshot and Video 
-
 ![](./timekpr-next-remote.png)
 
+<details>
+<summary> Video - Mobile phone controlling desktop</summary>
+
+In this demo, you can see how a parental phone (foreground) can easily load the web UI and quickly add time to a childs desktop device (background):
+
 https://user-images.githubusercontent.com/8253488/213629663-1de76346-6e79-412a-a368-c1f804c28b35.MP4
+
+</details>
+
+<details>
+<summary> Video - Docker start with gracefull error handling</summary>
+
+In this demo, you when some nodes are down, the back end and front end handle this without breaking.  Further, users on two different desktops can easily be controlled from the UI:
+
+https://user-images.githubusercontent.com/8253488/220523348-76c3f5ea-419d-46a7-8aa6-c809d095bfc9.mp4
+
+</details>
+
+
 
 ## Install
 
