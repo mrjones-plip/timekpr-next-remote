@@ -103,11 +103,58 @@
                     padding: 5px 0 0 0;
                 }
             }
+            /* ==========================================================================
+               Theme Stuffs
+               ========================================================================== */
+            .dark-mode {
+              background-color: black;
+              color: white;
+            }
+            .dark-mode #forkongithub a {
+              background:#fff;
+              color:#000;
+              box-shadow:4px 4px 10px rgba(255,255,255,0.8);
+            }
+            .dark-mode #forkongithub a:hover{background:#c11;
+              color:#000;
+            }
+            .dark-mode #forkongithub a::before,.dark-mode #forkongithub a::after{
+              background:#000;
+            }
+            .dark-mode .btn-outline-primary {
+              color: #fff;
+              background-color: #96baff;
+              border-color: #708ad9;
+            }
+            .dark-mode .btn-outline-primary:hover {
+              background-color: #96baff;
+              border-color: #708ad9;
+            }
+            .btn-check:checked + .btn-outline-primary {
+              background-color: #7585b5;
+            }
+            .dark-mode .btn-outline-primary:hover, .dark-mode .notify {
+              color: #4d67b5;
+            }
+            .dark-mode .fs-1 {
+              color: #7385cc;
+            }
+            .dark-mode .error {
+              color: #ffe140;
+            }
+            .dark-mode .btn-group .disabled  {
+              border: 1px solid darkblue !important;
+              color: #fdf5f6 !important;
+              background-color: darkgray;
+            }
 
         </style>
-    <title>Timekpr Next Remote</title>
+    <title>
+        Timekpr Next Remote
+    </title>
+
   </head>
-  <body>
+  <body class="">
     <!-- thanks https://codepo8.github.io/css-fork-on-github-ribbon/ ! -->
     <span id="forkongithub" class="hidden-print ">
         <a href="https://github.com/mrjones-plip/timekpr-next-remote">Fork me on GitHub</a>
@@ -116,8 +163,10 @@
 
   <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
     <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
-    <span class="fs-1">Timekpr Next Remote</span>
+    <span class="fs-1">Timekpr Next Remote
+    </span>
     </a>
+    <label class="btn btn-outline-primary" id="toggle_theme">Toggle Theme</label>
   </header>
 
   <div class="b-example-divider"></div>
@@ -253,6 +302,24 @@
             var mDisplay = m > 0 ? m + (m === 1 ? " min " : " mins ") : "";
             var sDisplay = s > 0 ? s + (s === 1 ? " sec" : " secs") : "";
             return hDisplay + mDisplay + sDisplay;
+        }
+
+        /**
+         * Flip the theme back and forth between light and dark
+         */
+        function toggleTheme() {
+          const element = document.body;
+          element.classList.toggle("dark-mode");
+          console.log("toggled!");
+        }
+        // add click handler to toggle theme
+        $('#toggle_theme').click(function (){
+          toggleTheme();
+        })
+        // thanks https://stackoverflow.com/a/59621903 !
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          // Dark
+          toggleTheme();
         }
 
     </script>
