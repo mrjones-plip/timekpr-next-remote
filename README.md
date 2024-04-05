@@ -61,7 +61,7 @@ Follow these steps for on each client you want to control:
 
 ## Settings
 
-### `config.py`
+### `conf.py`
 
 * `trackme` - python object to store all the folks you want to manage
 * `ssh_user` - user to SSH into client machines as. Defaults to  `timekpr-next-remote`
