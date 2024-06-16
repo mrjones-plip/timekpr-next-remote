@@ -5,7 +5,7 @@ import conf, re
 from fabric import Connection
 from paramiko.ssh_exception import AuthenticationException
 from paramiko.ssh_exception import NoValidConnectionsError
-
+from pathlib import Path
 
 def get_config():
     return conf.trackme
@@ -49,14 +49,26 @@ def get_usage(user, computer, ssh):
 def get_connection(computer):
     global connection
     # todo handle SSH keys instead of forcing it to be passsword only
-    connect_kwargs = {
-        'allow_agent': False,
-        'look_for_keys': False,
-        "password": conf.ssh_password
-    }
+    if conf.ssh_key.is_file() :
+        connect_kwargs = {
+            'allow_agent': False,
+            'look_for_keys': False,
+            'key_filename': conf.ssh_key
+        }
+        if conf.ssh_key_passphrase is defined and conf.ssh_key_passphrase is string :
+            use_passphrase = { 'passphrase': conf.ssh_key_passphrase }
+            connect_kwargs =  connect_kwargs | use_passphrase  
+
+    else :
+        connect_kwargs = {
+            'allow_agent': False,
+            'look_for_keys': False,
+            "password": conf.ssh_password
+        }
     try:
         connection = Connection(
             host=computer,
+            
             user=conf.ssh_user,
             connect_kwargs=connect_kwargs
         )
