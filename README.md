@@ -90,7 +90,7 @@ By design, this system is very secure as far as controlling clients over SSH, bu
 
 * [ ] add PIN protection in web GUI
 * [ ] add "refresh" button per client in web GUI
-* [ ] support ssh keys
+* [X] support ssh keys
 * [X] enable more than one user per machine
 * [X] better error handling when SSH fails etc.
 * [X] AJAX async loading
