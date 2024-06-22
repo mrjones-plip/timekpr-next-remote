@@ -1,5 +1,6 @@
 import main
-import conf, re, os
+import conf
+import re, os
 from fabric import Connection
 from paramiko.ssh_exception import AuthenticationException
 from flask import Flask, render_template, request, send_from_directory

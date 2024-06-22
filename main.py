@@ -1,11 +1,16 @@
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 
-import conf, re
+
+import conf, re, os
 from fabric import Connection
 from paramiko.ssh_exception import AuthenticationException
 from paramiko.ssh_exception import NoValidConnectionsError
+from paramiko.ssh_exception import ChannelException
+from paramiko.ssh_exception import PasswordRequiredException
+from paramiko.ssh_exception import SSHException
 from pathlib import Path
+
 
 def get_config():
     return conf.trackme
@@ -49,36 +54,39 @@ def get_usage(user, computer, ssh):
 def get_connection(computer):
     global connection
     # todo handle SSH keys instead of forcing it to be passsword only
-    if conf.ssh_key.is_file() :
-        connect_kwargs = {
-            'allow_agent': False,
-            'look_for_keys': False,
-            'key_filename': conf.ssh_key
-        }
-        if conf.ssh_key_passphrase is defined and conf.ssh_key_passphrase is string :
-            use_passphrase = { 'passphrase': conf.ssh_key_passphrase }
-            connect_kwargs =  connect_kwargs | use_passphrase  
+
+    connect_kwargs_common = {
+        'allow_agent': False,
+        'look_for_keys': False,
+    }
+    if hasattr(conf,'ssh_key') and Path(conf.ssh_key).is_file() :
+        connect_kwargs_merged = connect_kwargs_common | { 'key_filename': conf.ssh_key }
+        if hasattr(conf, 'ssh_key_passphrase') :
+            connect_kwargs_merged = connect_kwargs_merged | { 'password': conf.ssh_key_passphrase }
+    elif hasattr(conf,'ssh_password') :
+        connect_kwargs_merged = connect_kwargs_common | {"password": conf.ssh_password}
 
     else :
-        connect_kwargs = {
-            'allow_agent': False,
-            'look_for_keys': False,
-            "password": conf.ssh_password
-        }
+        quit(f"No SSH authentication configured")
     try:
         connection = Connection(
             host=computer,
-            
             user=conf.ssh_user,
-            connect_kwargs=connect_kwargs
+            forward_agent=False,
+            connect_kwargs=connect_kwargs_merged
         )
+        return connection
     except AuthenticationException as e:
         quit(f"Wrong credentials for user '{conf.ssh_user}' on host '{computer}'. "
               f"Check `ssh_user` and `ssh_password` credentials in conf.py.")
+    except ChannelException as e :
+        quit(f"Could not create a SSH channel for host '{computer}' \n Code: {code} Msg: {text} ")
+    except PasswordRequiredException as e:
+        quit(f"SSH Private key passphrase is unset or incorrect")
+    except SSHException as e :
+        quit(f"Failed to negotiate SSH connection or logic failure")
     except Exception as e:
         quit(f"Error logging in as user '{conf.ssh_user}' on host '{computer}', check conf.py. \n\n\t" + str(e))
-    finally:
-        return connection
 
 def adjust_time(up_down_string, seconds, ssh, user):
     command = conf.ssh_timekpra_bin + ' --settimeleft ' + user + ' ' + up_down_string + ' ' + str(seconds)
