@@ -1,3 +1,4 @@
 fabric
-paramiko
+paramiko > 1.6
 flask
+pathlib

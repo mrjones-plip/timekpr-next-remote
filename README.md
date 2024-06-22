@@ -45,6 +45,7 @@ https://user-images.githubusercontent.com/8253488/220523348-76c3f5ea-419d-46a7-8
 2. copy `conf.example.py` to `conf.py`
 3. edit `conf.py`:
    * change `ssh_password` to be a good password. This will be the password used to log into all the clients
+   * if you are using an SSH key for authentication, fill out `ssh_key` and optionally `ssh_key_passphrase`. Comment out the `ssh_password` directive. 
    * add key value pairs in `trackme` of the clients and IPs you want to manage.  You can use domain names as well.
 4. run `docker compose up -d`
 5. go to `http://your-server-IP:8080` on your phone or desktop
@@ -67,7 +68,8 @@ Follow these steps for on each client you want to control:
 * `ssh_user` - user to SSH into client machines as. Defaults to  `timekpr-next-remote`
 * `ssh_password` - password to use wen SSHing into client machines. Defaults to  `timekpr-next-remote`
 * `ssh_timekpra_bin` - path on clients where `timekpra` executable is. defaults to  `/usr/bin/timekpra`
-`ssh_key` - wtf - I don't know, SSH library wouldn't work with out this.  don't touch this
+* `ssh_key` - file location of SSH private key file. Supports OpenSSH private key format. 
+* `ssh_key_passphrase` - passphrase for encrypted private key file (optional) 
 
 ### docker compose
 
@@ -88,7 +90,7 @@ By design, this system is very secure as far as controlling clients over SSH, bu
 
 * [ ] add PIN protection in web GUI
 * [ ] add "refresh" button per client in web GUI
-* [ ] support ssh keys
+* [X] support ssh keys
 * [X] enable more than one user per machine
 * [X] better error handling when SSH fails etc.
 * [X] AJAX async loading
