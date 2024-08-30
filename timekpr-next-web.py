@@ -40,7 +40,7 @@ def increase_time(computer, user, seconds):
     if validate_request(computer, user)['result'] == "fail":
         return validate_request(computer, user), 500
     ssh = main.get_connection(computer)
-    if main.increase_time(seconds, ssh, user):
+    if main.increase_time(seconds, ssh, user, computer):
         usage = main.get_usage(user, computer, ssh)
         return {'result': "success", "time_left": usage['time_left'], "time_spent": usage['time_spent']}, 200
     else:
@@ -52,7 +52,7 @@ def decrease_time(computer, user, seconds):
     if validate_request(computer, user)['result'] == "fail":
         return validate_request(computer, user), 500
     ssh = main.get_connection(computer)
-    if main.decrease_time(seconds, ssh, user):
+    if main.decrease_time(seconds, ssh, user, computer):
         usage = main.get_usage(user, computer, ssh)
         return {'result': "success", "time_left": usage['time_left'], "time_spent": usage['time_spent']}, 200
     else:
