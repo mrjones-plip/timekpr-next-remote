@@ -15,7 +15,6 @@ def get_config():
 def send_alert(user, action, seconds, computer, ssh):
     for alerts in conf.gotify:
         if alerts['enabled'] is True:
-            print(f"truuuueee {alerts['enabled']=}")
             gotify = Gotify(
                 base_url = alerts['url'],
                 app_token= alerts['token'],
@@ -33,9 +32,7 @@ def send_alert(user, action, seconds, computer, ssh):
                 print(f"Failed to call Gotify. Config is: {alerts}.  Error is: {e}")
                 return False
             print(f"Gotify alert sent to {alerts['url']}")
-        else:
-
-            print("falseeee")
+            return True
 
 
 def get_usage(user, computer, ssh):

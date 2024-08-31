@@ -7,13 +7,14 @@ ssh_timekpra_bin = '/usr/bin/timekpra'
 ssh_key = './id_timekpr'
 
 gotify =[
-    # set to True to enable, update with you token and URL
+    # set to True to enable, update with your token and URL
     {
         'enabled': False,
         'token': 'token1-here',
         'url': 'http://url1-here.com'
     },
-    # Uncomment if you want to send alerts to more than one user - add as many as you'd like!
+    # Uncomment if you want to send alerts to more than one user.
+    # Copy and paste these 5 lines to add more alert destinations.
     # {
     #     'enabled': False,
     #     'token': 'token1-here',
