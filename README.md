@@ -32,7 +32,7 @@ https://user-images.githubusercontent.com/8253488/220523348-76c3f5ea-419d-46a7-8
 
 ## Optional  Alerts
 
-As of 1.3.0, alerts can be sent when ever time is added or removed. This is a different model, where instead of administrators controlling time, end users can be trusted to give themselves time, The catch is they know that administrators will know the moment they do. When our kids hit highschool, it became too tedious and too gatekeeper-ish to always be asked for more time and just blindly give it.
+As of 1.3.0, alerts can be sent when ever time is added or removed. This is a different model, where instead of administrators controlling time, end users can be trusted to give themselves time. The catch is they know that administrators will know the moment they do. When our kids hit high school, it became too tedious and too gatekeeper-ish to always be asked for more time and just blindly give it. This self server approach seemed way more appropriate!
 
 Assuming your user is named "Adnan", and they added 15 minutes and had 1 hours and 2 minutes left, the alert would look like this:
 
