@@ -13,24 +13,29 @@ def get_config():
 
 
 def send_alert(user, action, seconds, computer, ssh):
-    if conf.gotify['enabled']:
-        gotify = Gotify(
-            base_url = conf.gotify['url'],
-            app_token= conf.gotify['token'],
-        )
-        try:
-            usage = get_usage(user, computer, ssh)
-            added = humanize.naturaldelta(seconds)
-            remain = humanize.precisedelta(usage['time_left'])
-            result = gotify.create_message(
-                f"{user} {action} {added}, and has {remain} remaining :)",
-                title=f"{user} {action} time",
-                priority=2,
+    for alerts in conf.gotify:
+        if alerts['enabled'] is True:
+            print(f"truuuueee {alerts['enabled']=}")
+            gotify = Gotify(
+                base_url = alerts['url'],
+                app_token= alerts['token'],
             )
-        except Exception as e:
-            print(f"Failed to call Gotify. Config is: {conf.gotify}.  Error is: {e}")
-            return False
-        print(f"Gotify alert sent to {conf.gotify['url']}")
+            try:
+                usage = get_usage(user, computer, ssh)
+                added = humanize.naturaldelta(seconds)
+                remain = humanize.precisedelta(usage['time_left'])
+                result = gotify.create_message(
+                    f"{action} {added}, {remain} remaining :)",
+                    title=f"Timekpr: {user} {action} {added}",
+                    priority=2,
+                )
+            except Exception as e:
+                print(f"Failed to call Gotify. Config is: {alerts}.  Error is: {e}")
+                return False
+            print(f"Gotify alert sent to {alerts['url']}")
+        else:
+
+            print("falseeee")
 
 
 def get_usage(user, computer, ssh):
@@ -98,7 +103,10 @@ def adjust_time(up_down_string, seconds, ssh, user, computer):
     else:
         action = "removed"
     print(f"{action} {seconds} for user '{user}'")
-    send_alert(user, action, seconds, computer, ssh)
+    try:
+        send_alert(user, action, seconds, computer, ssh)
+    except Exception as e:
+        print(f"Failed to send alert: {e}")
     # todo - return false if this fails
     return True
 
