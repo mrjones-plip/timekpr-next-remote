@@ -11,7 +11,7 @@ gotify =[
     {
         'enabled': False,
         'token': 'token1-here',
-        'url': 'http://url2-here.com'
+        'url': 'http://url1-here.com'
     },
     # Uncomment if you want to send alerts to more than one user - add as many as you'd like!
     # {
