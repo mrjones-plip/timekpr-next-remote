@@ -7,9 +7,20 @@ Features:
 * Manage at least 1, likely up to 10, accounts
 * Run via a docker one liner
 * Intuitive web app interface is easy to use from any phone in the house
-
+* Optionally send alerts via [Gotify](https://gotify.net/) whenever time is added
 
 ![](./timekpr-next-remote.png)
+
+## Optional  Alerts
+
+As of 1.3.0, alerts can be sent when ever time is added or removed. This is a different model, where instead of administrators controlling time, end users can be trusted to give themselves time, The catch is they know that administrators will know the moment they do. When our kids hit highschool, it became too tedious and too gatekeeper-ish to always be asked for more time and just blindly give it.
+
+Assuming your user is named "Adnan", and they added 15 minutes and had 1 hours and 2 minutes left, the alert would look like this:
+
+> **Timekpr: Adnan added 15 minutes**
+> 
+> removed 15 minutes, 1 hours and 2 minutes remaining :)
+
 
 <details>
 <summary> Video - Mobile phone controlling desktop</summary>
@@ -43,9 +54,7 @@ https://user-images.githubusercontent.com/8253488/220523348-76c3f5ea-419d-46a7-8
 
 1. clone this repo
 2. copy `conf.example.py` to `conf.py`
-3. edit `conf.py`:
-   * change `ssh_password` to be a good password. This will be the password used to log into all the clients
-   * add key value pairs in `trackme` of the clients and IPs you want to manage.  You can use domain names as well.
+3. edit `conf.py` per [Settings section](#Settings) below
 4. run `docker compose up -d`
 5. go to `http://your-server-IP:8080` on your phone or desktop
 
@@ -61,6 +70,8 @@ Follow these steps for on each client you want to control:
 
 ## Settings
 
+Whenever you're editing setting, use care.  It's actually a python file, so you can cause the app to crash if you have an invalid config file.
+
 ### `conf.py`
 
 * `trackme` - python object to store all the folks you want to manage
@@ -68,6 +79,36 @@ Follow these steps for on each client you want to control:
 * `ssh_password` - password to use wen SSHing into client machines. Defaults to  `timekpr-next-remote`
 * `ssh_timekpra_bin` - path on clients where `timekpra` executable is. defaults to  `/usr/bin/timekpra`
 `ssh_key` - wtf - I don't know, SSH library wouldn't work with out this.  don't touch this
+
+#### Optional Gotify alerts
+
+These are optional!  Ignore if you don't want to send alerts.
+
+If you do want to set up alerts, go create a new app in  your Gotify instance and get the token to send alerts. You can add as many Gotify instances as you want.  By allowing more than one, administrators with their own Gotify user can get alerts.  Or more simply, send one alert and administrators can share an account.
+
+`gotify` - This is an array of Gotify instances that looks like this:
+
+```python
+gotify =[
+    # set to True to enable, update with you token and URL
+    {
+        'enabled': False,
+        'token': 'token1-here',
+        'url': 'http://url1-here.com'
+    },
+    # Uncomment if you want to send alerts to more than one user - add as many as you'd like!
+    # {
+    #     'enabled': False,
+    #     'token': 'token1-here',
+    #     'url': 'http://url2-here.com'
+    # }
+]
+```
+
+For each instance, set:
+* `enabled` - True
+* `token` - 16 character token you get from your Gotify instance for your app. Something like `BrAs-v.pg-PwsgS`
+* `url` - the URL for your gotify instance.  Must be reachable by your Timekpr Next Remote server.
 
 ### docker compose
 
@@ -103,12 +144,13 @@ By design, this system is very secure as far as controlling clients over SSH, bu
 
 ## Development
 
-Development can be done using locally running [LXD containers](https://canonical.com/blog/lxd-virtual-machines-an-overview). After launching an Ubuntu 22.04 container, SSH is enable by default, but only allows key access, so be sure to add your public keys as needed.  From there `adduser` a new user, then run this to install timekpr:
+Development can be done using locally running [LXD](https://canonical.com/blog/lxd-virtual-machines-an-overview) or [Incus](https://linuxcontainers.org/incus/) containers. After launching an Ubuntu 22.04 container, SSH is enable by default, but only allows key access, so be sure to add your public keys as needed.  From there `adduser` a new user, then run this to install timekpr:
 
 ```
+sudo apt install software-properties-common
 sudo add-apt-repository ppa:mjasnik/ppa
-sudo apt-get update
-sudo apt-get install timekpr-next x11-apps
+sudo apt update
+sudo apt install timekpr-next x11-apps
 ```
 
 You can then `ssh -X USER@IP` and then run `timekpra` to configure your test users in timekpr via a GUI.  
