@@ -30,9 +30,9 @@ def send_alert(user, action, seconds, computer, ssh):
                 )
             except Exception as e:
                 print(f"Failed to call Gotify. Config is: {alerts}.  Error is: {e}")
-                return False
+                continue
             print(f"Gotify alert sent to {alerts['url']}")
-            return True
+    return True
 
 
 def get_usage(user, computer, ssh):
@@ -96,9 +96,9 @@ def adjust_time(up_down_string, seconds, ssh, user, computer):
     command = conf.ssh_timekpra_bin + ' --settimeleft ' + user + ' ' + up_down_string + ' ' + str(seconds)
     ssh.run(command)
     if up_down_string == '-':
-        action = "added"
-    else:
         action = "removed"
+    else:
+        action = "added"
     print(f"{action} {seconds} for user '{user}'")
     try:
         send_alert(user, action, seconds, computer, ssh)
