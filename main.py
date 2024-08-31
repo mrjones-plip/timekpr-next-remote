@@ -1,14 +1,36 @@
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 
-import conf, re
+import conf, re, humanize
 from fabric import Connection
 from paramiko.ssh_exception import AuthenticationException
 from paramiko.ssh_exception import NoValidConnectionsError
+from gotify import Gotify
 
 
 def get_config():
     return conf.trackme
+
+
+def send_alert(user, action, seconds, computer, ssh):
+    if conf.gotify['enabled']:
+        gotify = Gotify(
+            base_url = conf.gotify['url'],
+            app_token= conf.gotify['token'],
+        )
+        try:
+            usage = get_usage(user, computer, ssh)
+            added = humanize.naturaldelta(seconds)
+            remain = humanize.precisedelta(usage['time_left'])
+            result = gotify.create_message(
+                f"{user} {action} {added}, and has {remain} remaining :)",
+                title=f"{user} {action} time",
+                priority=2,
+            )
+        except Exception as e:
+            print(f"Failed to call Gotify. Config is: {conf.gotify}.  Error is: {e}")
+            return False
+        print(f"Gotify alert sent to {conf.gotify['url']}")
 
 
 def get_usage(user, computer, ssh):
@@ -68,22 +90,24 @@ def get_connection(computer):
     finally:
         return connection
 
-def adjust_time(up_down_string, seconds, ssh, user):
+def adjust_time(up_down_string, seconds, ssh, user, computer):
     command = conf.ssh_timekpra_bin + ' --settimeleft ' + user + ' ' + up_down_string + ' ' + str(seconds)
     ssh.run(command)
     if up_down_string == '-':
-        print(f"added {str(seconds)} for user {user}")
+        action = "added"
     else:
-        print(f"removed {str(seconds)} for user {user}")
+        action = "removed"
+    print(f"{action} {seconds} for user '{user}'")
+    send_alert(user, action, seconds, computer, ssh)
     # todo - return false if this fails
     return True
 
 
-def increase_time(seconds, ssh, user):
-    return adjust_time('+', seconds, ssh, user)
+def increase_time(seconds, ssh, user, computer):
+    return adjust_time('+', seconds, ssh, user, computer)
 
 
-def decrease_time(seconds, ssh, user):
-    return adjust_time('-', seconds, ssh, user)
+def decrease_time(seconds, ssh, user, computer):
+    return adjust_time('-', seconds, ssh, user, computer)
 
 

@@ -5,3 +5,9 @@ ssh_user = 'timekpr-next-remote'
 ssh_password = 'timekpr-next-remote'
 ssh_timekpra_bin = '/usr/bin/timekpra'
 ssh_key = './id_timekpr'
+
+gotify = {
+    'enabled' : False,
+    'token' : 'token-here',
+    'url' : 'http://url-here.com'
+}
