@@ -22,10 +22,11 @@ def send_alert(user, action, seconds, computer, ssh):
             try:
                 usage = get_usage(user, computer, ssh)
                 added = humanize.naturaldelta(seconds)
-                remain = humanize.precisedelta(usage['time_left'])
+                unused = humanize.precisedelta(usage['time_left'])
+                used = humanize.precisedelta(usage['time_spent'])
                 result = gotify.create_message(
-                    f"{action} {added}, {remain} remaining :)",
-                    title=f"Timekpr: {user} {action} {added}",
+                    f"{action} {added}, {unused} unused, {used} used :)",
+                    title=f"Timekpr: {user} {action} time",
                     priority=2,
                 )
             except Exception as e:
