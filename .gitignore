@@ -4,3 +4,5 @@ conf.py
 __pycache__
 ssh.pub
 .idea
+.project
+*.swp
