@@ -78,6 +78,17 @@ Whenever you're editing setting, use care.  It's actually a python file, so you 
 * `ssh_password` - password to use wen SSHing into client machines. Defaults to  `timekpr-next-remote`
 * `ssh_timekpra_bin` - path on clients where `timekpra` executable is. defaults to  `/usr/bin/timekpra`
 `ssh_key` - wtf - I don't know, SSH library wouldn't work with out this.  don't touch this
+* `secret_key = 'secretkey see below'`
+* `pin_hash = see below`
+
+To set the pin, you have to generate a hash first localy for example like:
+
+* `python3 -c "from werkzeug.security import generate_password_hash; print(generate_password_hash('1234'))"`
+
+for the Secret you can use:
+* `python3 -c "import secrets; print(secrets.token_hex(32))"`
+
+
 
 #### Optional Gotify alerts
 
